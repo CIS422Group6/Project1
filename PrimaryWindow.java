@@ -1,8 +1,6 @@
 import java.util.Optional;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -18,15 +16,7 @@ import javafx.stage.Stage;
 
 public class PrimaryWindow extends Application{
 
-	/**
-	 * @param args
-	 */
-	
-	public static void main(String[] args) {
-		launch(args);
-	}
-
-	// create and show the window
+	/** Create and show the main program window */
 	public void start(Stage stage) throws Exception {
 		// set window properties
 		stage.setTitle("The Address Book");
@@ -36,27 +26,41 @@ public class PrimaryWindow extends Application{
 		// create the layout manager
 		VBox layout = new VBox(0);
 		Scene scene = new Scene(layout);
-		
-		// sample database
-		ObservableList<Person> data = FXCollections.observableArrayList(
-				new Person("John", "Doe", "123 West Lane", "12345"),
-				new Person("Jane", "Don", "321 East Street", "54321")
-				);
-				
+	
 		// table that displays the data
-		TableView<Person> table = new TableView<Person>();
+		TableView<Entry> table = new TableView<Entry>();
+		
+		// class-wide reference to existing book
+		AddressBook book = File.openBook();
 		
 		// build the menu bar
 		MenuBar menuBar = new MenuBar();
 		// file menu
 		Menu menuFile = new Menu("File");
 		MenuItem newBook = new MenuItem("New");
+		newBook.setOnAction((ActionEvent t) -> {
+			File.newBook();
+		});
 		MenuItem openBook = new MenuItem("Open...");
+		openBook.setOnAction((ActionEvent t) -> {
+			// reference to existing book
+			//book = File.openBook();
+		});
 		MenuItem saveBook = new MenuItem("Save");
+		saveBook.setOnAction((ActionEvent t) -> {
+			File.saveBook();
+		});
 		MenuItem saveAsBook = new MenuItem("Save As...");
+		saveAsBook.setOnAction((ActionEvent t) -> {
+			File.saveAsBook();
+		});
 		MenuItem closeBook = new MenuItem("Close address book");
+		closeBook.setOnAction((ActionEvent t) -> {
+			File.closeBook();
+		});
 		MenuItem exit = new MenuItem("Exit");
 		exit.setOnAction((ActionEvent t) -> {
+			// temporary functionality, needs to check if saved!
 			System.exit(0);
 		});
 		menuFile.getItems().addAll(newBook, openBook, new SeparatorMenuItem(), saveBook, saveAsBook, new SeparatorMenuItem(), closeBook, exit);
@@ -65,26 +69,26 @@ public class PrimaryWindow extends Application{
 		Menu menuEdit = new Menu("Edit");
 		MenuItem addPerson = new MenuItem("Add new person");
 		addPerson.setOnAction((ActionEvent t) -> {
-			PersonDialog personDialog = new PersonDialog(new Person());
-			Optional<Person> result = personDialog.showAndWait();
+			PersonDialog personDialog = new PersonDialog();
+			Optional<Entry> result = personDialog.showAndWait();
 			if (result.isPresent()) {
-				data.add(result.get());
+				book.addEntry(result.get());
 			}
 		});
 		MenuItem editPerson = new MenuItem("Edit person");
 		editPerson.setOnAction((ActionEvent t) -> {
 			int selected = table.getSelectionModel().getSelectedIndex();
-			PersonDialog personDialog = new PersonDialog(data.get(selected));
-			Optional<Person> result = personDialog.showAndWait();
+			PersonDialog personDialog = new PersonDialog(book.book.get(selected));
+			Optional<Entry> result = personDialog.showAndWait();
 			if (result.isPresent()) {
-				data.set(selected, result.get());
+				book.editEntry(result.get(), selected);
 			}
 
 		});
 		MenuItem deletePerson = new MenuItem("Delete person");
 		deletePerson.setOnAction((ActionEvent t) -> {
 			int selected = table.getSelectionModel().getSelectedIndex();
-			data.remove(selected);
+			book.deleteEntry(selected);
 		});
 		menuEdit.getItems().addAll(addPerson, editPerson, deletePerson);
 		
@@ -100,20 +104,21 @@ public class PrimaryWindow extends Application{
 		// build the table
 		table.setEditable(false);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		TableColumn<Person, String> firstName = new TableColumn<Person, String>("First Name");
-		firstName.setCellValueFactory(new PropertyValueFactory<Person, String>("firstName"));
+		TableColumn<Entry, String> firstName = new TableColumn<Entry, String>("First Name");
+		firstName.setCellValueFactory(new PropertyValueFactory<Entry, String>("firstName"));
 		firstName.setMinWidth(80);
-		TableColumn<Person, String> lastName = new TableColumn<Person, String>("Last Name");
-		lastName.setCellValueFactory(new PropertyValueFactory<Person, String>("lastName"));
+		TableColumn<Entry, String> lastName = new TableColumn<Entry, String>("Last Name");
+		lastName.setCellValueFactory(new PropertyValueFactory<Entry, String>("lastName"));
 		lastName.setMinWidth(80);
-		TableColumn<Person, String> address = new TableColumn<Person, String>("Address");
-		address.setCellValueFactory(new PropertyValueFactory<Person, String>("address"));
+		TableColumn<Entry, String> address = new TableColumn<Entry, String>("Address");
+		address.setCellValueFactory(new PropertyValueFactory<Entry, String>("address"));
 		address.setMinWidth(80);
-		TableColumn<Person, String> zipcode = new TableColumn<Person, String>("Zipcode");
-		zipcode.setCellValueFactory(new PropertyValueFactory<Person, String>("zipcode"));
+		TableColumn<Entry, String> zipcode = new TableColumn<Entry, String>("Zipcode");
+		zipcode.setCellValueFactory(new PropertyValueFactory<Entry, String>("zipcode"));
 		zipcode.setMinWidth(80);
 		
-		table.setItems(data);
+		// come up with a better naming scheme
+		table.setItems(book.book);
 		table.getColumns().addAll(firstName, lastName, address, zipcode);
 
 		// add the elements to the layout manager

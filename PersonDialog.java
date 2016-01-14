@@ -7,9 +7,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 // dialog box from adding/editing people, uses JavaFX Dialog for added functionality
-public class PersonDialog extends Dialog<Person> {
+public class PersonDialog extends Dialog<Entry> {
 	
-	public PersonDialog(Person person) {
+	public PersonDialog(Entry person) {
 		//set window properties
 		setTitle("Edit entry");
 		setHeaderText("Create a new person or edit an existing one");
@@ -57,5 +57,9 @@ public class PersonDialog extends Dialog<Person> {
 		
 		getDialogPane().setContent(layout);
 		firstName.requestFocus();
+	}
+	
+	public PersonDialog() {
+		this(new Entry());
 	}
 }
