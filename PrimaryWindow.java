@@ -69,8 +69,8 @@ public class PrimaryWindow extends Application{
 		Menu menuEdit = new Menu("Edit");
 		MenuItem addPerson = new MenuItem("Add new person");
 		addPerson.setOnAction((ActionEvent t) -> {
-			PersonDialog personDialog = new PersonDialog();
-			Optional<Entry> result = personDialog.showAndWait();
+			EntryWindow entryWindow = new EntryWindow();
+			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
 				book.addEntry(result.get());
 			}
@@ -78,8 +78,10 @@ public class PrimaryWindow extends Application{
 		MenuItem editPerson = new MenuItem("Edit person");
 		editPerson.setOnAction((ActionEvent t) -> {
 			int selected = table.getSelectionModel().getSelectedIndex();
-			PersonDialog personDialog = new PersonDialog(book.book.get(selected));
-			Optional<Entry> result = personDialog.showAndWait();
+			Entry entry = book.book.get(selected).clone();
+			// implement a proper method in Entry to clone
+			EntryWindow entryWindow = new EntryWindow(entry);
+			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
 				book.editEntry(result.get(), selected);
 			}

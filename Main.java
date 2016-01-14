@@ -9,7 +9,7 @@ import javafx.application.Application;
 
 public class Main {
 	
-	// create a sample address book
+	// create a sample address book until file i/o is working
 	public static AddressBook book = new AddressBook();
 	
 	/** Initializes the program */

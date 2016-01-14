@@ -9,7 +9,7 @@ public class Entry {
 	//private String id;
 	//private String user-defined[];
 	
-	// creates a new instance of an entry with the supplied arguments
+	/** Creates a new instance of an entry with the supplied arguments */
 	public Entry(String firstName, String lastName, String address, String zipcode) {
 		setFirstName(firstName);
 		setLastName(lastName);
@@ -18,6 +18,11 @@ public class Entry {
 	}
 	public Entry() {
 		this("", "", "", "");
+	}
+	
+	// quick clone method
+	public Entry clone() {
+		return new Entry(getFirstName(), getLastName(), getAddress(), getZipcode());
 	}
 	
 	/** Returns whether a class variable was successfully assigned */
