@@ -13,3 +13,9 @@ hs_err_pid*
 
 *.swp
 *.swo
+
+#eclipse
+/bin
+.project
+.settings
+.classpath
