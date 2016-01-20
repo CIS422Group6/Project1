@@ -10,7 +10,8 @@ JC = javac
 SOURCES = \
 	src/Entry.java \
 	src/AddressBook.java \
-	src/File.java \
+	src/BookFile.java \
+	src/FileWindow.java
 	src/EntryWindow.java \
 	src/PrimaryWindow.java \
 	src/Main.java

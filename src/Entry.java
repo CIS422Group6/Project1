@@ -8,9 +8,10 @@ public class Entry {
 	private String address;
 	private String zipcode;
 	
-	// likely features for the next iteration
-	//private String id;
-	//private String user-defined[];
+	/* likely features for the next iteration
+	private String id;
+	private String user-defined[];
+	*/
 	
 	/** Instantiates an Entry with the provided values. */
 	public Entry(String firstName, String lastName, String address, String zipcode) {
@@ -19,6 +20,7 @@ public class Entry {
 		setAddress(address);
 		setZipcode(zipcode);
 	}
+
 	/** Instantiates an Entry with blank values. */
 	public Entry() {
 		this("", "", "", "");

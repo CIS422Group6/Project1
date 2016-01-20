@@ -1,3 +1,4 @@
+//import java.io.File;
 import java.util.Optional;
 
 import javafx.application.Application;
@@ -19,8 +20,10 @@ import javafx.stage.Stage;
  */
 
 public class PrimaryWindow extends Application {
+	AddressBook book = new AddressBook();
 
 	/** Create and show the main program window. */
+	@SuppressWarnings("unchecked")
 	public void start(Stage stage) throws Exception {
 		// set window properties
 		stage.setTitle("The Address Book");
@@ -29,46 +32,54 @@ public class PrimaryWindow extends Application {
 		
 		// create the layout manager
 		VBox layout = new VBox(0);
-		Scene scene = new Scene(layout);
+		Scene scene = new Scene(layout, 400, 400);
 	
 		// table that displays the data
 		TableView<Entry> table = new TableView<Entry>();
 		
-		// reference to the book that is loaded in program memory
-		AddressBook book = new AddressBook();
-		
 		// build the menu bar
 		MenuBar menuBar = new MenuBar();
+		
 		// file menu
 		Menu menuFile = new Menu("File");
 		MenuItem newBook = new MenuItem("New");
 		newBook.setOnAction((ActionEvent t) -> {
-			File.newBook();
+			book = BookFile.newBook();
+			// update table gui
+	        table.setItems(book.getBook());
+			table.setVisible(true);
 		});
 		MenuItem openBook = new MenuItem("Open...");
 		openBook.setOnAction((ActionEvent t) -> {
-			//book = File.openBook("path");
+			String path = FileWindow.openWindow(stage);
+	        book.setPath(path);
+	        book.setBook(BookFile.openBook(path));
+	        // update table gui
+	        table.setItems(book.getBook());
+	        table.setVisible(true);
 		});
 		MenuItem saveBook = new MenuItem("Save");
 		saveBook.setOnAction((ActionEvent t) -> {
-			File.saveBook(book);
+			BookFile.saveBook(book, stage);
 		});
 		MenuItem saveAsBook = new MenuItem("Save As...");
 		saveAsBook.setOnAction((ActionEvent t) -> {
-			File.saveAsBook();
+			BookFile.saveAsBook(book, stage);
 		});
 		MenuItem closeBook = new MenuItem("Close address book");
 		closeBook.setOnAction((ActionEvent t) -> {
-			File.closeBook();
+			// check if book is saved then close
+			book = null;
+			table.setVisible(false);
 		});
 		MenuItem exit = new MenuItem("Exit");
 		exit.setOnAction((ActionEvent t) -> {
-			// temporary functionality, needs to check if saved!
+			// check if book(s) are saved
 			System.exit(0);
 		});
 		menuFile.getItems().addAll(newBook, openBook, new SeparatorMenuItem(), saveBook, saveAsBook, new SeparatorMenuItem(), closeBook, exit);
 		
-		// edit menu with initial functionality
+		// edit menu
 		Menu menuEdit = new Menu("Edit");
 		MenuItem addPerson = new MenuItem("Add new person");
 		addPerson.setOnAction((ActionEvent t) -> {
@@ -81,8 +92,7 @@ public class PrimaryWindow extends Application {
 		MenuItem editPerson = new MenuItem("Edit person");
 		editPerson.setOnAction((ActionEvent t) -> {
 			int selected = table.getSelectionModel().getSelectedIndex();
-			Entry entry = book.book.get(selected).clone();
-			// implement a proper method in Entry to clone
+			Entry entry = book.getBook().get(selected).clone();
 			EntryWindow entryWindow = new EntryWindow(entry);
 			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
@@ -92,6 +102,7 @@ public class PrimaryWindow extends Application {
 		});
 		MenuItem deletePerson = new MenuItem("Delete person");
 		deletePerson.setOnAction((ActionEvent t) -> {
+			// only if an entry is selected
 			int selected = table.getSelectionModel().getSelectedIndex();
 			book.deleteEntry(selected);
 		});
@@ -105,34 +116,37 @@ public class PrimaryWindow extends Application {
 		
 		menuBar.getMenus().addAll(menuFile, menuEdit, menuHelp);
 
-
 		// build the table
+		VBox.setVgrow(table, Priority.ALWAYS);
 		table.setEditable(false);
+		table.setVisible(false);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		
 		TableColumn<Entry, String> firstName = new TableColumn<Entry, String>("First Name");
 		firstName.setCellValueFactory(new PropertyValueFactory<Entry, String>("firstName"));
 		firstName.setMinWidth(80);
+		
 		TableColumn<Entry, String> lastName = new TableColumn<Entry, String>("Last Name");
 		lastName.setCellValueFactory(new PropertyValueFactory<Entry, String>("lastName"));
 		lastName.setMinWidth(80);
+		
 		TableColumn<Entry, String> address = new TableColumn<Entry, String>("Address");
 		address.setCellValueFactory(new PropertyValueFactory<Entry, String>("address"));
 		address.setMinWidth(80);
+		
 		TableColumn<Entry, String> zipcode = new TableColumn<Entry, String>("Zipcode");
 		zipcode.setCellValueFactory(new PropertyValueFactory<Entry, String>("zipcode"));
 		zipcode.setMinWidth(80);
-		
-		// come up with a better naming scheme
-		table.setItems(book.book);
+
+        table.setItems(book.getBook());
 		table.getColumns().addAll(firstName, lastName, address, zipcode);
 
 		// add the elements to the layout manager
 		layout.getChildren().addAll(menuBar, table);
-		VBox.setVgrow(table, Priority.ALWAYS);
 
 		// display the window
 		stage.setScene(scene);
-		stage.sizeToScene();;
+		stage.sizeToScene();
 		stage.show();
 	}
 }
