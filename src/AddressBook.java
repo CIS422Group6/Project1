@@ -63,11 +63,11 @@ public class AddressBook {
 			Element dBookRoot = dBook.createElement("addressBook");
 			dBook.appendChild(dBookRoot);
 
-			/* leaving the name save feature out for the moment, till load problem is fixed
+			/* leaving the name save feature out for the moment, till load problem is fixed*/
 			Element bookName = dBook.createElement("bookName");
 			bookName.appendChild(dBook.createTextNode(name));
-			dBook.appendChild(bookName);
-			*/
+			dBookRoot.appendChild(bookName);
+			
 			
 			Element entry;
 			Attr atr;

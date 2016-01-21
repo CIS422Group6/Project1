@@ -23,8 +23,9 @@ public class BookFile {
 	}
 
 	/** Loads a book from a file (at a given path) into program memory. */
-	static ObservableList<Entry> openBook(String file) {
+	static AddressBook openBook(String file) {
 		// empty list of entries
+		AddressBook book = new AddressBook();
 		ObservableList<Entry> bot = FXCollections.observableArrayList();
 
 		File bookSource = new File(file);
@@ -36,7 +37,7 @@ public class BookFile {
 			NodeList entryList = dBook.getElementsByTagName("entry");
 
 			// when we originally had this method returning an AddressBook this was possible but it's not at the moment. Will fix.
-			// book.setName(dBook.getElementsByTagName("bookName").item(0).getTextContent());
+			book.setName(dBook.getElementsByTagName("bookName").item(0).getTextContent());
 			Entry entry;
 
 			for (int i = 0; i < entryList.getLength(); i++) {
@@ -54,8 +55,8 @@ public class BookFile {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return bot;
+		book.setBook(bot);
+		return book;
 	}
 
 	/** Writes changes to an AddressBook back into its file. */

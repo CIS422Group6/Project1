@@ -52,8 +52,11 @@ public class PrimaryWindow extends Application {
 		MenuItem openBook = new MenuItem("Open...");
 		openBook.setOnAction((ActionEvent t) -> {
 			String path = FileWindow.openWindow(stage);
-	        book.setPath(path);
-	        book.setBook(BookFile.openBook(path));
+			if (path != null) {
+				book.setPath(path);
+			}
+			stage.setTitle(book.getName());
+			book = BookFile.openBook(path);
 	        // update table gui
 	        table.setItems(book.getBook());
 	        table.setVisible(true);
@@ -119,7 +122,7 @@ public class PrimaryWindow extends Application {
 		// build the table
 		VBox.setVgrow(table, Priority.ALWAYS);
 		table.setEditable(false);
-		table.setVisible(false);
+		table.setVisible(true);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		
 		TableColumn<Entry, String> firstName = new TableColumn<Entry, String>("First Name");
