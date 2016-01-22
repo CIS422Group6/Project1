@@ -4,6 +4,7 @@ import java.util.Optional;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -44,6 +45,7 @@ public class PrimaryWindow extends Application {
 		Menu menuFile = new Menu("File");
 		MenuItem newBook = new MenuItem("New");
 		newBook.setOnAction((ActionEvent t) -> {
+			checkModified(stage, "creating a new book");
 			book = BookFile.newBook();
 			// update table gui
 	        table.setItems(book.getBook());
@@ -51,33 +53,39 @@ public class PrimaryWindow extends Application {
 		});
 		MenuItem openBook = new MenuItem("Open...");
 		openBook.setOnAction((ActionEvent t) -> {
+			checkModified(stage, "opening a new book");
 			String path = FileWindow.openWindow(stage);
 			if (path != null) {
-				book.setPath(path);
+				book = BookFile.openBook(path);
+			} else {
+				return;
 			}
 			stage.setTitle(book.getName());
-			book = BookFile.openBook(path);
 	        // update table gui
 	        table.setItems(book.getBook());
 	        table.setVisible(true);
 		});
 		MenuItem saveBook = new MenuItem("Save");
 		saveBook.setOnAction((ActionEvent t) -> {
+			book.setModified(false);
 			BookFile.saveBook(book, stage);
 		});
 		MenuItem saveAsBook = new MenuItem("Save As...");
 		saveAsBook.setOnAction((ActionEvent t) -> {
+			book.setModified(false);
 			BookFile.saveAsBook(book, stage);
 		});
 		MenuItem closeBook = new MenuItem("Close address book");
 		closeBook.setOnAction((ActionEvent t) -> {
-			// check if book is saved then close
+			// check if book is not saved
+			checkModified(stage, "closing");
+			// close book
 			book = null;
 			table.setVisible(false);
 		});
 		MenuItem exit = new MenuItem("Exit");
 		exit.setOnAction((ActionEvent t) -> {
-			// check if book(s) are saved
+			checkModified(stage, "exiting");
 			System.exit(0);
 		});
 		menuFile.getItems().addAll(newBook, openBook, new SeparatorMenuItem(), saveBook, saveAsBook, new SeparatorMenuItem(), closeBook, exit);
@@ -89,6 +97,7 @@ public class PrimaryWindow extends Application {
 			EntryWindow entryWindow = new EntryWindow();
 			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
+				book.setModified(true);
 				book.addEntry(result.get());
 			}
 		});
@@ -99,6 +108,7 @@ public class PrimaryWindow extends Application {
 			EntryWindow entryWindow = new EntryWindow(entry);
 			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
+				book.setModified(true);
 				book.editEntry(result.get(), selected);
 			}
 
@@ -107,6 +117,7 @@ public class PrimaryWindow extends Application {
 		deletePerson.setOnAction((ActionEvent t) -> {
 			// only if an entry is selected
 			int selected = table.getSelectionModel().getSelectedIndex();
+			book.setModified(true);
 			book.deleteEntry(selected);
 		});
 		menuEdit.getItems().addAll(addPerson, editPerson, deletePerson);
@@ -122,7 +133,7 @@ public class PrimaryWindow extends Application {
 		// build the table
 		VBox.setVgrow(table, Priority.ALWAYS);
 		table.setEditable(false);
-		table.setVisible(true);
+		table.setVisible(false);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		
 		TableColumn<Entry, String> firstName = new TableColumn<Entry, String>("First Name");
@@ -142,7 +153,7 @@ public class PrimaryWindow extends Application {
 		zipcode.setMinWidth(80);
 
         table.setItems(book.getBook());
-		table.getColumns().addAll(firstName, lastName, address, zipcode);
+		table.getColumns().addAll(lastName, firstName, address, zipcode);
 
 		// add the elements to the layout manager
 		layout.getChildren().addAll(menuBar, table);
@@ -151,5 +162,18 @@ public class PrimaryWindow extends Application {
 		stage.setScene(scene);
 		stage.sizeToScene();
 		stage.show();
+	}
+	
+	/** Prompts a user whether they want to save changes to the current book before an action is performed. */
+	private void checkModified(Stage stage, String action) {
+		if (book != null && book.isModified()) {
+			ConfirmWindow confirmWindow = new ConfirmWindow(action);
+			Optional<ButtonType> result = confirmWindow.showAndWait();
+			if (result.get() == ButtonType.YES) {
+					BookFile.saveBook(book, stage);
+			} else if (result.get() == ButtonType.CANCEL) {
+				return;
+			}
+		}
 	}
 }

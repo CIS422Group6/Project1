@@ -1,3 +1,5 @@
+import java.io.File;
+
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -9,8 +11,12 @@ public class FileWindow {
 	/** Returns the location to an AddressBook to be opened. */
 	public static String openWindow(Stage stage) {
 		FileChooser fileWindow = new FileChooser();
-		String path = fileWindow.showOpenDialog(stage).getPath();
-		return path;
+		File file = fileWindow.showOpenDialog(stage);
+		if (file != null) {
+			return file.getPath();
+		} else {
+			return null;
+		}
 	}
 	
 	/** Returns the user-selected location that an AddressBook is to be saved. */

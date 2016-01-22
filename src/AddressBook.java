@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
  */
 
 public class AddressBook {
-	protected ObservableList<Entry> book; // allows other classes to view it
+	protected ObservableList<Entry> book; // allow other classes to view it but use methods to change it
 	private String name;
 	private String path;
 	private boolean isModified;

@@ -56,6 +56,7 @@ public class BookFile {
 			e.printStackTrace();
 		}
 		book.setBook(bot);
+		book.setPath(file);
 		return book;
 	}
 
