@@ -1,7 +1,5 @@
 import java.io.File;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,41 +20,41 @@ public class BookFile {
 		return book;
 	}
 
-	/** Loads a book from a file (at a given path) into program memory. */
+	/** Loads a book from a file (at a given path) into an AddressBook and returns it. */
 	static AddressBook openBook(String file) {
-		// empty list of entries
-		AddressBook book = new AddressBook();
-		ObservableList<Entry> bot = FXCollections.observableArrayList();
-
 		File bookSource = new File(file);
+		
+		// create a blank AddressBook to fill
+		AddressBook book = new AddressBook();
+		book.setPath(file);
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuild = dbf.newDocumentBuilder();
 			Document dBook = dBuild.parse(bookSource);
-
-			NodeList entryList = dBook.getElementsByTagName("entry");
-
-			// when we originally had this method returning an AddressBook this was possible but it's not at the moment. Will fix.
+			
 			book.setName(dBook.getElementsByTagName("bookName").item(0).getTextContent());
-			Entry entry;
-
+			
+			NodeList entryList = dBook.getElementsByTagName("entry");
 			for (int i = 0; i < entryList.getLength(); i++) {
 				Node entryNode = entryList.item(i);
 
 				if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element entryEle = (Element) entryNode;
-					entry = new Entry(entryEle.getElementsByTagName("firstName").item(0).getTextContent(),
+					Entry entry = new Entry(entryEle.getElementsByTagName("firstName").item(0).getTextContent(),
 							entryEle.getElementsByTagName("lastName").item(0).getTextContent(),
-							entryEle.getElementsByTagName("address").item(0).getTextContent(),
-							entryEle.getElementsByTagName("zipcode").item(0).getTextContent());
-					bot.add(entry);
+							entryEle.getElementsByTagName("delivery").item(0).getTextContent(),
+							entryEle.getElementsByTagName("second").item(0).getTextContent(),
+							entryEle.getElementsByTagName("city").item(0).getTextContent(),
+							entryEle.getElementsByTagName("state").item(0).getTextContent(),
+							entryEle.getElementsByTagName("zipcode").item(0).getTextContent(),
+							entryEle.getElementsByTagName("phone").item(0).getTextContent(),
+							entryEle.getElementsByTagName("email").item(0).getTextContent());
+					book.addEntry(entry);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		book.setBook(bot);
-		book.setPath(file);
 		return book;
 	}
 

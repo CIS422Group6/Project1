@@ -4,9 +4,7 @@ import javafx.collections.ObservableList;
 import java.io.File;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-//import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-//import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -25,7 +23,7 @@ public class AddressBook {
 	private String path;
 	private boolean isModified;
 	
-	/** Instantiates an empty AddressBook with default values. */
+	/** Constructor for an AddressBook with default values. */
 	public AddressBook() {
 		book = FXCollections.observableArrayList();
 		setName("Address Book");
@@ -33,76 +31,99 @@ public class AddressBook {
 		setModified(false);
 	}
 	
-	/** Returns whether adding a new Entry was successful. */
+	/** Add a new Entry and return if it was successful. */
 	public boolean addEntry(Entry entry) {
 		book.add(entry);
 		return true;
 	}
 	
-	/** Returns whether an edit of an Entry was successful. */
+	/** Edit an Entry and return if it was successful. */
 	public boolean editEntry(Entry entry, int index) {
 		book.set(index, entry);
 		return true;
 	}
 	
-	/** Returns whether the deletion of an Entry was successful. */
+	/** Delete an Entry an return if it was successful. */
 	public boolean deleteEntry(int index) {
 		book.remove(index);
 		return true;
 	}
 	
-	/** Returns whether the AddressBook was successfully saved into a file. */
+	/** Save the AddressBook into a file and return if it was successful. */
 	public boolean saveAddressBook() {
 		// convert the data to (xml) format and write it to the file located at path
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuild = dbf.newDocumentBuilder();
-			
-			// base
+
+			// addressbook element
 			Document dBook = dBuild.newDocument();
 			Element dBookRoot = dBook.createElement("addressBook");
 			dBook.appendChild(dBookRoot);
-
-			/* leaving the name save feature out for the moment, till load problem is fixed*/
+			
+			// name element
 			Element bookName = dBook.createElement("bookName");
 			bookName.appendChild(dBook.createTextNode(name));
 			dBookRoot.appendChild(bookName);
-			
-			
-			Element entry;
-			Attr atr;
-			Element firstName;
-			Element lastName;
-			Element address;
-			Element zipcode;
 
-			// add all entries to document under entry tag
-			for (int i = 0; i < book.size(); i++) {
+			// entry elements
+			Element entry;
+			int i = 0;
+			Attr atr;
+			Element firstName, lastName,
+				delivery,
+				second,
+				city, state, zipcode,
+				phone, email;
+
+			// build each entry
+			for (Entry e : book) {
 				entry = dBook.createElement("entry");
 				dBookRoot.appendChild(entry);
 
 				atr = dBook.createAttribute("id");
 				atr.setValue(Integer.toString(i));
 				entry.setAttributeNode(atr);
+				i++;
 
 				firstName = dBook.createElement("firstName");
-				firstName.appendChild(dBook.createTextNode(book.get(i).getFirstName()));
+				firstName.appendChild(dBook.createTextNode(e.getFirstName()));
 				entry.appendChild(firstName);
 
 				lastName = dBook.createElement("lastName");
-				lastName.appendChild(dBook.createTextNode(book.get(i).getLastName()));
+				lastName.appendChild(dBook.createTextNode(e.getLastName()));
 				entry.appendChild(lastName);
 
-				address = dBook.createElement("address");
-				address.appendChild(dBook.createTextNode(book.get(i).getAddress()));
-				entry.appendChild(address);
+				delivery = dBook.createElement("delivery");
+				delivery.appendChild(dBook.createTextNode(e.getDelivery()));
+				entry.appendChild(delivery);
+
+				second = dBook.createElement("second");
+				second.appendChild(dBook.createTextNode(e.getSecond()));
+				entry.appendChild(second);
+
+				city = dBook.createElement("city");
+				city.appendChild(dBook.createTextNode(e.getCity()));
+				entry.appendChild(city);
+
+				state = dBook.createElement("state");
+				state.appendChild(dBook.createTextNode(e.getState()));
+				entry.appendChild(state);
 
 				zipcode = dBook.createElement("zipcode");
-				zipcode.appendChild(dBook.createTextNode(book.get(i).getZipcode()));
+				zipcode.appendChild(dBook.createTextNode(e.getZipcode()));
 				entry.appendChild(zipcode);
+
+				phone = dBook.createElement("phone");
+				phone.appendChild(dBook.createTextNode(e.getPhone()));
+				entry.appendChild(phone);
+
+				email = dBook.createElement("email");
+				email.appendChild(dBook.createTextNode(e.getEmail()));
+				entry.appendChild(email);
 			}
 
-			// save document built
+			// save the document to a file
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer trFo = tf.newTransformer();
 			DOMSource dIn = new DOMSource(dBook);
@@ -110,6 +131,7 @@ public class AddressBook {
 			trFo.transform(dIn, dOut);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 	    }
 		return true;
 	}
@@ -132,7 +154,7 @@ public class AddressBook {
 	}
 	
 	/** Returns the value associated with each class variable. */
-	public ObservableList<Entry> getBook(){
+	public ObservableList<Entry> getBook() {
 		return book;
 	}
 	public String getName() {
