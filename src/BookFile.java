@@ -115,7 +115,7 @@ public class BookFile {
 	}
 	
 
-	public ArrayList<Entry> importTSV(String path){
+	static ArrayList<Entry> importTSV(String path){
 		ArrayList<Entry> imported = new ArrayList<Entry>();
 		
 		try{
@@ -152,7 +152,7 @@ public class BookFile {
 		return imported;
 	}
 	
-	public boolean exportTSV(Entry entry, String path){
+	static boolean exportTSV(Entry entry, String path){
 		
 		File file = new File(path);
 		
