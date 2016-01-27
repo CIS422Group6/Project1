@@ -9,6 +9,8 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
+
 /**
  * A collection of functions to read an AddressBook into program memory and write to disk.
  */
@@ -75,11 +77,57 @@ public class BookFile {
 		String path = FileWindow.saveWindow(stage);
 		book.setPath(path);
 		book.saveAddressBook();
+		
+		
+		Entry tester = new Entry();
+		tester.setFirstName("jack");
+		tester.setLastName("Brigleb");
+		search(book,tester);
+		
+		
+		
+		
+		
+		
 		return true;
 	}
+	
+	static AddressBook search(AddressBook book, Entry target){
+		ArrayList<String> entry = target.toList();
+		
+		AddressBook temp = book;
+		for(int i = 0;i<entry.size();i++){
+			AddressBook srcd = new AddressBook();
+			
+			if(entry.get(i).length()>0){
+				System.out.println("iter");
+				for(int j = 0;j<temp.getBook().size();j++){
+					System.out.println("."+entry.get(i)+". vs ."+temp.getBook().get(j).toList().get(i)+".");
+					if(entry.get(i).equals(temp.getBook().get(j).toList().get(i))){
+						System.out.println("GOT000000000000000");
+						srcd.addEntry(temp.getBook().get(j).clone());
+					}
+				}
+				temp = srcd;
+				
+			}
+			
+			
+		}
+		
+		System.out.println(temp.getBook().size());
+		
+		for(int l = 0;l< temp.getBook().size();l++){
+			System.out.println("GOTIT");
+		}
+		return temp;
+	}
+	
 
 	/** Closes the currently open AddressBook. */
 	static void closeBook() {
 		// future iteration
 	}
+	
+	
 }

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * A custom object that represents an entry in an address book.
  */
@@ -96,6 +98,8 @@ public class Entry {
 		return true;
 	}
 	
+	
+	
 	/** Returns the value associated with each class variable. */
 	public String getFirstName() {
 		return firstName;
@@ -124,4 +128,19 @@ public class Entry {
 	public String getEmail() {
 		return email;
 	}
+	
+	public ArrayList<String> toList(){
+		ArrayList<String> tl = new ArrayList<String>();
+		tl.add(getFirstName());
+		tl.add(getLastName());
+		tl.add(getDelivery());
+		tl.add(getSecond());
+		tl.add(getCity());
+		tl.add(getState());
+		tl.add(getZipcode());
+		tl.add(getPhone());
+		tl.add(getEmail());
+		return tl;
+	}
+	
 }
