@@ -18,11 +18,11 @@ import org.w3c.dom.Element;
  */
 
 public class AddressBook {
-	protected ObservableList<Entry> book; // allow other classes to view it but use methods to change it
+	protected ObservableList<Entry> book; // other classes can access/edit
 	private String name;
 	private String path;
 	private boolean isModified;
-	
+
 	/** Constructor for an AddressBook with default values. */
 	public AddressBook() {
 		book = FXCollections.observableArrayList();
@@ -30,25 +30,7 @@ public class AddressBook {
 		setPath(""); // no path by default
 		setModified(false);
 	}
-	
-	/** Add a new Entry and return if it was successful. */
-	public boolean addEntry(Entry entry) {
-		book.add(entry);
-		return true;
-	}
-	
-	/** Edit an Entry and return if it was successful. */
-	public boolean editEntry(Entry entry, int index) {
-		book.set(index, entry);
-		return true;
-	}
-	
-	/** Delete an Entry an return if it was successful. */
-	public boolean deleteEntry(int index) {
-		book.remove(index);
-		return true;
-	}
-	
+
 	/** Save the AddressBook into a file and return if it was successful. */
 	public boolean saveAddressBook() {
 		// convert the data to (xml) format and write it to the file located at path
@@ -60,7 +42,7 @@ public class AddressBook {
 			Document dBook = dBuild.newDocument();
 			Element dBookRoot = dBook.createElement("addressBook");
 			dBook.appendChild(dBookRoot);
-			
+
 			// name element
 			Element bookName = dBook.createElement("bookName");
 			bookName.appendChild(dBook.createTextNode(name));
@@ -68,13 +50,13 @@ public class AddressBook {
 
 			// entry elements
 			Element entry;
-			int i = 0;
+			int id = 0;
 			Attr atr;
 			Element firstName, lastName,
-				delivery,
-				second,
-				city, state, zipcode,
-				phone, email;
+			delivery,
+			second,
+			city, state, zipcode,
+			phone, email;
 
 			// build each entry
 			for (Entry e : book) {
@@ -82,9 +64,9 @@ public class AddressBook {
 				dBookRoot.appendChild(entry);
 
 				atr = dBook.createAttribute("id");
-				atr.setValue(Integer.toString(i));
+				atr.setValue(Integer.toString(id));
 				entry.setAttributeNode(atr);
-				i++;
+				id++;
 
 				firstName = dBook.createElement("firstName");
 				firstName.appendChild(dBook.createTextNode(e.getFirstName()));
@@ -132,28 +114,25 @@ public class AddressBook {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
-	    }
+		}
 		return true;
 	}
-	
-	/** Returns whether a class variable was successfully assigned to a value. */
-	public boolean setBook(ObservableList<Entry> book){
+
+	/** Set class variables. */
+	public void setBook(ObservableList<Entry> book){
 		this.book = book;
-		return true;
 	}
-	public boolean setName(String name) {
+	public void setName(String name) {
 		this.name = name;
-		return true;
 	}
-	public boolean setPath(String path) {
+	public void setPath(String path) {
 		this.path = path;
-		return true;
 	}
 	public void setModified(boolean modified) {
 		this.isModified = modified;
 	}
-	
-	/** Returns the value associated with each class variable. */
+
+	/** Return class variable. */
 	public ObservableList<Entry> getBook() {
 		return book;
 	}

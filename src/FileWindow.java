@@ -8,22 +8,40 @@ import javafx.stage.Stage;
  */
 
 public class FileWindow {
+	public static final int OPEN_XML = 0, SAVE_XML = 1, IMPORT_TSV = 2, EXPORT_TSV = 3;
+
 	/** Returns the location to an AddressBook to be opened. */
-	public static String openWindow(Stage stage) {
+	public static String chooseFile(Stage stage, int type) {
 		FileChooser fileWindow = new FileChooser();
-		File file = fileWindow.showOpenDialog(stage);
+		FileChooser.ExtensionFilter all = new FileChooser.ExtensionFilter("All types", "*.*"),
+				xml = new FileChooser.ExtensionFilter("eXtensible Markup Language file", "*.xml"),
+				tsv = new FileChooser.ExtensionFilter("Tab-separated Values file", "*.tsv");
+		File file = null;
+
+		// generate appropriate dialog and file-types
+		switch (type) {
+		case 0:
+			fileWindow.getExtensionFilters().addAll(xml, all);
+			file = fileWindow.showOpenDialog(stage);
+			break;
+		case 1:
+			fileWindow.getExtensionFilters().addAll(xml, all);
+			file = fileWindow.showSaveDialog(stage);
+			break;
+		case 2:
+			fileWindow.getExtensionFilters().addAll(tsv, all);
+			file = fileWindow.showOpenDialog(stage);
+			break;
+		case 3:
+			fileWindow.getExtensionFilters().addAll(tsv, all);
+			file = fileWindow.showSaveDialog(stage);
+			break;
+		}
+
+		// return chosen file
 		if (file != null) {
 			return file.getPath();
-		} else {
-			return null;
-		}
-	}
-	
-	/** Returns the user-selected location that an AddressBook is to be saved. */
-	public static String saveWindow(Stage stage) {
-		FileChooser fileWindow = new FileChooser();
-		fileWindow.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML files (*.XML)", "*.XML"));
-		String path = fileWindow.showSaveDialog(stage).getPath();
-		return path;
+		} // otherwise
+		return null;
 	}
 }

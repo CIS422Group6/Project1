@@ -11,7 +11,8 @@ SOURCES = \
 	src/Entry.java \
 	src/AddressBook.java \
 	src/BookFile.java \
-	src/FileWindow.java
+	src/ConfirmWindow.java \
+	src/FileWindow.java \
 	src/EntryWindow.java \
 	src/PrimaryWindow.java \
 	src/Main.java

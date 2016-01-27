@@ -2,9 +2,6 @@ import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
@@ -18,6 +15,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -25,15 +23,15 @@ import javafx.stage.Stage;
  */
 
 public class PrimaryWindow extends Application {
-	Stage _stage;
-	Main program;
-	// represents the currently open AddressBook wrapped as a bindable GUI element
-	ObjectProperty<AddressBook> book = new SimpleObjectProperty<AddressBook>();
+	// class variables
+	Main main;
+	Stage stage;
+	AddressBook book = new AddressBook();
 
-	/** Constructor for a PrimaryWindow with an AddressBook. */
+	/** Constructor for a PrimaryWindow with the AddressBook to be loaded. */
 	public PrimaryWindow(Main main, AddressBook book) {
-		program = main;
-		this.book.set(book);
+		this.main = main;
+		this.book = book;
 	}
 
 	/** Create and show the main program window. */
@@ -43,7 +41,7 @@ public class PrimaryWindow extends Application {
 		stage.setTitle("The Address Book");
 		stage.setMinHeight(600);
 		stage.setMinWidth(800);
-		
+
 		// initialize all the GUI components
 		VBox layout = new VBox(0);
 		Scene scene = new Scene(layout, 800, 600);
@@ -52,125 +50,147 @@ public class PrimaryWindow extends Application {
 		// menuBar
 		MenuBar menuBar = new MenuBar();
 		Menu menuFile = new Menu("File");
-		MenuItem newBook = new MenuItem("New");
-		MenuItem openBook = new MenuItem("Open...");
-		MenuItem saveBook = new MenuItem("Save");
-		MenuItem saveAsBook = new MenuItem("Save As...");
-		MenuItem closeBook = new MenuItem("Close address book");
-		MenuItem exit = new MenuItem("Exit");
+		MenuItem newBook = new MenuItem("New"),
+				openBook = new MenuItem("Open..."),
+				saveBook = new MenuItem("Save"),
+				saveAsBook = new MenuItem("Save As..."),
+				closeBook = new MenuItem("Close address book"),
+				exit = new MenuItem("Exit");
 		Menu menuEdit = new Menu("Edit");
-		MenuItem addEntry = new MenuItem("Add new entry");
-		MenuItem editEntry = new MenuItem("Edit entry");
-		MenuItem deleteEntry = new MenuItem("Delete entry");
-		MenuItem searchEntry = new MenuItem("Search");
-		MenuItem importEntry = new MenuItem("Import...");
-		MenuItem exportEntry = new MenuItem("Export...");
+		MenuItem addEntry = new MenuItem("Add new entry"),
+				editEntry = new MenuItem("Edit entry"),
+				deleteEntry = new MenuItem("Delete entry"),
+				searchEntry = new MenuItem("Search"),
+				importEntry = new MenuItem("Import..."),
+				exportEntry = new MenuItem("Export...");
 		Menu menuHelp = new Menu("Help");
-		MenuItem about = new MenuItem("About The Address Book");
-		MenuItem website = new MenuItem("Visit website");
+		MenuItem about = new MenuItem("About The Address Book"),
+				website = new MenuItem("Visit website");
 
 
-		// fileMenu buttons
+		// set fileMenu button properties
 		newBook.setOnAction((ActionEvent t) -> {
-			if (book.get() == null) {
-				// open a blank AddressBook and display it
-				book.set(BookFile.newBook());
-				table.itemsProperty().bind(new SimpleObjectProperty<ObservableList<Entry>>(book.get().getBook()));
-			} else {
-				// use a new window if an AddressBook is open
-				try {
-					program.newWindow(BookFile.newBook());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+			main.createWindow(BookFile.newBook());
 		});
 		openBook.setOnAction((ActionEvent t) -> {
-			// prompt the user to open an AddressBook
-			String path = FileWindow.openWindow(stage);
+			// prompt the user to select a file from disk 
+			String path = FileWindow.chooseFile(stage, FileWindow.OPEN_XML);
 			if (path != null) {
-				book.set(BookFile.openBook(path));
-			} else {
-				return; // do nothing if no AddressBook is selected
-			}
-			stage.setTitle(book.get().getName());
-			// set table data
-			table.itemsProperty().bind(new SimpleObjectProperty<ObservableList<Entry>>(book.get().getBook()));
+				// if an AddressBook is not currently open
+				if (!book.isModified() && book.getPath() == "") {
+					// open the file into an AddressBook in this window
+					book = BookFile.openBook(path);
+					table.setItems(book.getBook());
+					return;
+				} // otherwise use a new window, alerting if we cannot
+				main.createWindow(BookFile.openBook(path));
+			} // do nothing if no AddressBook was selected
 		});
-		// buttons disabled if no AddressBook is open
-		saveBook.disableProperty().bind(book.isNull());
 		saveBook.setOnAction((ActionEvent t) -> {
 			// changes are saved, reset flag
-			book.get().setModified(false);
-			BookFile.saveBook(book.get(), stage);
+			book.setModified(false);
+			BookFile.saveBook(book, stage);
 		});
-		saveAsBook.disableProperty().bind(book.isNull());
 		saveAsBook.setOnAction((ActionEvent t) -> {
-			book.get().setModified(false);
-			BookFile.saveAsBook(book.get(), stage);
+			// changes are saved, reset flag
+			book.setModified(false);
+			BookFile.saveAsBook(book, stage);
 		});
-		closeBook.disableProperty().bind(book.isNull());
 		closeBook.setOnAction((ActionEvent t) -> {
-			if (!saveModifications(stage, "closing")) {
+			// prompt user to save changes before closing
+			if (!saveModifications(ConfirmWindow.SAVE_CLOSE)) {
 				return;
 			}
 			// close the current window
-			program.closeWindow(this);
+			this.main.closeWindow(this);
 		});
-		exit.setOnAction((ActionEvent t) -> {
-			if (!saveModifications(stage, "exiting")) {
+		// override X button behavior
+		stage.setOnCloseRequest(event -> {
+			// prompt user to save changes before closing
+			if (!saveModifications(ConfirmWindow.SAVE_CLOSE)) {
 				return;
 			}
-			program.closeAllWindows();
+			// close the current window
+			this.main.closeWindow(this);
+		});
+		exit.setOnAction((ActionEvent t) -> {
+			this.main.exit();
 		});
 		menuFile.getItems().addAll(newBook, openBook, new SeparatorMenuItem(), saveBook, saveAsBook, new SeparatorMenuItem(), closeBook, exit);
 		// editMenu buttons
-		// button disabled if no AddressBook is open
-		addEntry.disableProperty().bind(book.isNull());
 		addEntry.setOnAction((ActionEvent t) -> {
-			EntryWindow entryWindow = new EntryWindow();
+			// prompt user for Entry details
+			EntryWindow entryWindow = new EntryWindow(EntryWindow.ADD);
 			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
-				book.get().setModified(true);
-				book.get().addEntry(result.get());
-			} // otherwise user cancelled adding an Entry
+				// changes are made, set flag
+				book.setModified(true);
+				book.getBook().add(result.get());
+			} // otherwise user cancelled
 		});
-		// button disabled if exactly 1 Entry is not selected or no AddressBook is open
-		editEntry.disableProperty().bind(Bindings.or(Bindings.notEqual(1, Bindings.size(table.getSelectionModel().getSelectedItems())), book.isNull()));
+		// button disabled if exactly 1 Entry is not selected
+		editEntry.disableProperty().bind(Bindings.notEqual(1, Bindings.size(table.getSelectionModel().getSelectedItems())));
 		editEntry.setOnAction((ActionEvent t) -> {
-			// copy Entry to pre-fill input window
+			// fill input window
 			int selected = table.getSelectionModel().getSelectedIndex();
-			Entry entry = book.get().getBook().get(selected).clone();
-			EntryWindow entryWindow = new EntryWindow(entry);
+			Entry entry = book.getBook().get(selected).clone();
+			EntryWindow entryWindow = new EntryWindow(entry, EntryWindow.EDIT);
 			Optional<Entry> result = entryWindow.showAndWait();
 			if (result.isPresent()) {
-				book.get().setModified(true);
-				book.get().editEntry(result.get(), selected);
+				// changes are made, set flag
+				book.setModified(true);
+				book.getBook().set(selected, result.get());
 			}
 		});
-		// button disabled if no Entry is selected or no AddressBook is open
-		deleteEntry.disableProperty().bind(Bindings.or(table.getSelectionModel().selectedItemProperty().isNull(), book.isNull()));
+		// button disabled if no Entry is selected
+		deleteEntry.disableProperty().bind(table.getSelectionModel().selectedItemProperty().isNull());
 		deleteEntry.setOnAction((ActionEvent t) -> {
-			//ObservableList<Integer> selected = table.getSelectionModel().getSelectedIndices();
-			book.get().getBook().removeAll(table.getSelectionModel().getSelectedItems());
-			book.get().setModified(true);
-			//for (Integer i : selected) {
-			//	book.get().deleteEntry(i);
-			//}
+			// confirm deletion
+			ConfirmWindow confirmWindow = new ConfirmWindow(ConfirmWindow.DELETE_ENTRY);
+			Optional<ButtonType> result = confirmWindow.showAndWait();
+			if (result.get() == ButtonType.YES) {
+				// delete entry and set flag
+				book.getBook().removeAll(table.getSelectionModel().getSelectedItems());
+				book.setModified(true);
+			} // otherwise do nothing
 		});
+		// button disabled while dialog is open
 		searchEntry.setOnAction((ActionEvent t) -> {
+			searchEntry.setDisable(true);
+			EntryWindow entryWindow = new EntryWindow(EntryWindow.SEARCH);
+			entryWindow.initModality(Modality.NONE);
+			Optional<Entry> result = entryWindow.showAndWait();
+			// update search until user closes dialog
+			while (result.isPresent()) {
+				// search and apply new filtered AddressBook
+				AddressBook filter = BookFile.search(book, result.get());
+				table.setItems(filter.getBook());
+				// re-show prompt
+				result = entryWindow.showAndWait();
+			}
+			// reset table to original AddressBook
+			table.setItems(this.book.getBook());
+			searchEntry.setDisable(false);
 		});
 		importEntry.setOnAction((ActionEvent t) -> {
+			String path = FileWindow.chooseFile(stage, FileWindow.IMPORT_TSV);
+			if (path != null) {
+				// add the .tsv into the current book
+				book.getBook().addAll(BookFile.importTSV(path));
+				book.setModified(true);
+			} // do nothing if no file selected
 		});
 		exportEntry.setOnAction((ActionEvent t) -> {
+			String path = FileWindow.chooseFile(stage, FileWindow.EXPORT_TSV);
+			if (path != null) {
+				BookFile.exportTSV(book, path);
+			} // do nothing if no file selected
 		});
 		menuEdit.getItems().addAll(addEntry, editEntry, deleteEntry, new SeparatorMenuItem(), searchEntry, new SeparatorMenuItem(), importEntry, exportEntry);
 		// helpMenu buttons
 		about.setOnAction((ActionEvent t) -> {
-
 		});
 		website.setOnAction((ActionEvent t) -> {
-
 		});
 		menuHelp.getItems().addAll(about, website);
 		// build menuBar
@@ -178,9 +198,9 @@ public class PrimaryWindow extends Application {
 
 		// set table properties
 		VBox.setVgrow(table, Priority.ALWAYS);
+		table.setItems(book.getBook());
 		table.setEditable(false);
 		table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		table.visibleProperty().bind(book.isNotNull());
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		// table columns
 		TableColumn<Entry, String> firstName = new TableColumn<Entry, String>("First Name");
@@ -198,45 +218,42 @@ public class PrimaryWindow extends Application {
 		TableColumn<Entry, String> zipcode = new TableColumn<Entry, String>("Zipcode");
 		zipcode.setCellValueFactory(new PropertyValueFactory<Entry, String>("zipcode"));
 		zipcode.setMinWidth(80);
-		
+
 		TableColumn<Entry, String> phone = new TableColumn<Entry, String>("Phone");
 		phone.setCellValueFactory(new PropertyValueFactory<Entry, String>("phone"));
 		phone.setMinWidth(80);
-		
+
 		TableColumn<Entry, String> email = new TableColumn<Entry, String>("Email");
 		email.setCellValueFactory(new PropertyValueFactory<Entry, String>("email"));
 		email.setMinWidth(80);
-
-		//table.itemsProperty().bind(new SimpleObjectProperty<ObservableList<Entry>>(book.get().getBook()));
 		// build table
 		table.getColumns().addAll(lastName, firstName, address, zipcode, phone, email);
-		
-		// display the window
+
+		// build the window
 		layout.getChildren().addAll(menuBar, table);
 		stage.setScene(scene);
 		stage.sizeToScene();
 		stage.show();
-		_stage = stage;
-	}
-	
-	public void stop() {
-		_stage.requestFocus();
-		_stage.close();
+		this.stage = stage;
 	}
 
-	/** Prompts the user if changes to the current AddressBook should be saved and returns whether it can safely be closed. */
-	public boolean saveModifications(Stage stage, String action) {
-		if (book.get() != null && book.get().isModified()) {
-			ConfirmWindow confirmWindow = new ConfirmWindow(action);
+	/** Prompts the user if changes to the current AddressBook should be saved and returns whether the window can safely be closed. */
+	public boolean saveModifications(int type) {
+		if (book != null && book.isModified()) {
+			// pull focus into current window
+			stage.requestFocus();
+			// prompt the user if they would like to save changes
+			ConfirmWindow confirmWindow = new ConfirmWindow(book.getName(), type);
 			Optional<ButtonType> result = confirmWindow.showAndWait();
 			if (result.get() == ButtonType.YES) {
-				BookFile.saveBook(book.get(), stage);
+				// save changes if YES
+				BookFile.saveBook(book, this.stage);
 			} else if (result.get() == ButtonType.CANCEL) {
-				// keep program open
+				// keep window open if CANCEL
 				return false;
-			}
-			// ButtonType.NO does nothing
-		}
+			} // discard changes if NO
+		} // window can safely be closed
+		stage.close();
 		return true;
 	}
 }
