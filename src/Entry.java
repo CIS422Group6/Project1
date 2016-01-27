@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 
 /**
@@ -63,11 +64,17 @@ public class Entry {
 	/** Returns whether a class variable was successfully assigned. */
 	public boolean setFirstName(String firstName) {
 		this.firstName = firstName;
-		return true;
+		if(firstName.matches("[a-zA-Z]+")){
+			return true;
+		}
+		return false;
 	}
 	public boolean setLastName(String lastName) {
 		this.lastName = lastName;
-		return true;
+		if(lastName.matches("[a-zA-Z]+")){
+			return true;
+		}
+		return false;
 	}
 	public boolean setDelivery(String delivery) {
 		this.delivery = delivery;
@@ -79,23 +86,52 @@ public class Entry {
 	}
 	public boolean setCity(String city) {
 		this.city = city;
-		return true;
+		if(city.matches("[a-zA-Z]+")){
+			return true;
+		}
+		return false;
 	}
 	public boolean setState(String state) {
 		this.state = state;
-		return true;
+		if(state.matches("[a-zA-Z]+")){
+			return true;
+		}
+		return false;
 	}
 	public boolean setZipcode(String zipcode) {
 		this.zipcode = zipcode;
-		return true;
+		String[] parts = zipcode.split("-");
+		if((zipcode.length()==5)&&(zipcode.matches("\\d+"))){
+			
+			return true;	
+		}else if((zipcode.length() == 10)&&(parts.length>1)&&
+				(parts[0].length() == 5)&&(parts[1].length()==4)&&
+				(parts[0].matches("\\d+"))&&(parts[1].matches("\\d+"))){
+			
+			return true;	
+		}else{
+			
+			return false;
+		}
+		
 	}
 	public boolean setPhone(String phone) {
 		this.phone = phone;
-		return true;
+		if(((phone.length()==10)&&(phone.matches("\\d+")))||(phone.matches("[0-9]{3}+-[0-9]{3}+-[0-9]{4}"))){
+        	return true;
+        }
+			
+		return false;
 	}
 	public boolean setEmail(String email) {
 		this.email = email;
-		return true;
+		
+		if(email.matches("[0-9a-zA-Z._]+@[0-9a-zA-Z.-]+\\.[a-zA-Z]{2,3}")){
+			return true;
+		}else{
+			return false;
+		}
+		
 	}
 	
 	
@@ -142,5 +178,10 @@ public class Entry {
 		tl.add(getEmail());
 		return tl;
 	}
+	
+	
+	
+	
+	
 	
 }

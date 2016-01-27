@@ -1,4 +1,9 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javafx.stage.Stage;
 
@@ -79,16 +84,6 @@ public class BookFile {
 		book.saveAddressBook();
 		
 		
-		Entry tester = new Entry();
-		tester.setFirstName("jack");
-		tester.setLastName("Brigleb");
-		search(book,tester);
-		
-		
-		
-		
-		
-		
 		return true;
 	}
 	
@@ -100,8 +95,11 @@ public class BookFile {
 			AddressBook srcd = new AddressBook();
 			
 			if(entry.get(i).length()>0){
+				
 				for(int j = 0;j<temp.getBook().size();j++){
+					
 					if(entry.get(i).equals(temp.getBook().get(j).toList().get(i))){
+			
 						srcd.addEntry(temp.getBook().get(j).clone());
 					}
 				}
@@ -111,8 +109,85 @@ public class BookFile {
 			
 			
 		}
+		
+		
 		return temp;
 	}
+	
+
+	public ArrayList<Entry> importTSV(String path){
+		ArrayList<Entry> imported = new ArrayList<Entry>();
+		
+		try{
+		BufferedReader file = new BufferedReader(new FileReader(new File(path)));
+		String current = file.readLine();
+		while(current!=null){
+			String[] fields = current.split("\t");
+			Entry temp = new Entry();
+			
+			boolean test = true;
+			
+			test = test && temp.setCity(fields[0]);
+			test = test && temp.setState(fields[1]);
+			test = test && temp.setZipcode(fields[2]);
+			test = test && temp.setDelivery(fields[3]);
+			test = test && temp.setSecond(fields[4]);
+			test = test && temp.setLastName(fields[5]);
+			test = test && temp.setFirstName(fields[6]);
+			test = test && temp.setPhone(fields[7]);
+			if(test){
+				imported.add(temp);
+			}else{
+				// there was a problem field, confirm?
+			}
+			
+			current = file.readLine();
+		}
+		
+		file.close();
+		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return imported;
+	}
+	
+	public boolean exportTSV(Entry entry, String path){
+		
+		File file = new File(path);
+		
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(file));
+			
+			out.write(entry.getCity());
+			out.write("\t");
+			out.write(entry.getState());
+			out.write("\t");
+			out.write(entry.getZipcode());
+			out.write("\t");
+			out.write(entry.getDelivery());
+			out.write("\t");
+			out.write(entry.getSecond());
+			out.write("\t");
+			out.write(entry.getLastName());
+			out.write("\t");
+			out.write(entry.getFirstName());
+			out.write("\t");
+			out.write(entry.getPhone());
+			out.write("\n");
+			
+			out.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		return true;
+	}
+	
 	
 
 	/** Closes the currently open AddressBook. */
