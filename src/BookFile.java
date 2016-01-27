@@ -100,11 +100,8 @@ public class BookFile {
 			AddressBook srcd = new AddressBook();
 			
 			if(entry.get(i).length()>0){
-				System.out.println("iter");
 				for(int j = 0;j<temp.getBook().size();j++){
-					System.out.println("."+entry.get(i)+". vs ."+temp.getBook().get(j).toList().get(i)+".");
 					if(entry.get(i).equals(temp.getBook().get(j).toList().get(i))){
-						System.out.println("GOT000000000000000");
 						srcd.addEntry(temp.getBook().get(j).clone());
 					}
 				}
@@ -113,12 +110,6 @@ public class BookFile {
 			}
 			
 			
-		}
-		
-		System.out.println(temp.getBook().size());
-		
-		for(int l = 0;l< temp.getBook().size();l++){
-			System.out.println("GOTIT");
 		}
 		return temp;
 	}
