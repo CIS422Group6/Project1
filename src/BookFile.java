@@ -61,6 +61,7 @@ public class BookFile {
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			StringWriter s = new StringWriter();
 			e.printStackTrace(new PrintWriter(s));
 			String data = s.toString();
@@ -86,6 +87,9 @@ public class BookFile {
 	/** Creates a new file and saves the AddressBook into it. */
 	static boolean saveAsBook(AddressBook book, Stage stage) {
 		String path = FileWindow.chooseFile(stage, FileWindow.SAVE_XML);
+		if (path == null) {
+			return false;
+		}
 		book.setPath(path);
 		book.saveAddressBook();
 		return true;
@@ -130,7 +134,6 @@ public class BookFile {
 				String[] fields = current.split("\t");
 				Entry entry = new Entry();
 				boolean test = true;
-
 				// only add the first 8 fields, passing them through validation
 				test = test && entry.setCity(fields[0]);
 				test = test && entry.setState(fields[1]);

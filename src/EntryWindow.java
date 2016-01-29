@@ -16,7 +16,7 @@ import javafx.scene.layout.GridPane;
 public class EntryWindow extends Dialog<Entry> {
 	public static final int ADD = 0, EDIT = 1, SEARCH = 2;
 	ButtonType confirm, cancel;
-	
+
 	public static String fields[] = new String[]{
 			"First name must use letters only.",
 			"Last name must use letters only.",
@@ -91,7 +91,7 @@ public class EntryWindow extends Dialog<Entry> {
 					test = false;
 					data += fields[8] + "\n";
 				}
-				
+
 				// inform user if input validation failed
 				if (test) {
 					return entry;

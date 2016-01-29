@@ -1,3 +1,5 @@
+import java.awt.Desktop;
+import java.net.URI;
 import java.util.Optional;
 
 import javafx.application.Application;
@@ -189,8 +191,18 @@ public class PrimaryWindow extends Application {
 		menuEdit.getItems().addAll(addEntry, editEntry, deleteEntry, new SeparatorMenuItem(), searchEntry, new SeparatorMenuItem(), importEntry, exportEntry);
 		// helpMenu buttons
 		about.setOnAction((ActionEvent t) -> {
+			try {
+				Desktop.getDesktop().browse(new URI("https://www.assembla.com/spaces/xis22w16-team6/wiki/Software_Documentation"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 		website.setOnAction((ActionEvent t) -> {
+			try {
+				Desktop.getDesktop().browse(new URI("https://www.assembla.com/spaces/xis22w16-team6/wiki/Home"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 		menuHelp.getItems().addAll(about, website);
 		// build menuBar
